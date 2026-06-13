@@ -1,0 +1,45 @@
+Intuition
+The weight of a word is simply the sum of the weights of all its characters. So, for each word, we traverse all its letters and keep adding their corresponding values from the weights array.
+
+After finding the total weight, we take it modulo 26 since there are 26 lowercase English letters. The obtained remainder is then mapped to a character in reverse alphabetical order, where 0 corresponds to 'z', 1 to 'y', ..., and 25 to 'a'.
+
+By repeating this process for every word and concatenating the mapped characters, we obtain the required result string.
+
+Approach
+Initialize a StringBuilder to store the final answer.
+Iterate through each word in the words array.
+For the current word, calculate its total weight by summing the weights of all its characters using the given weights array.
+Compute totalWeight % 26 to obtain the mapped index.
+Convert this index to its corresponding character using the reverse alphabetical mapping (0 → 'z', 1 → 'y', ..., 25 → 'a').
+Append the mapped character to the StringBuilder.
+After processing all words, return the resulting string.
+Complexity
+Time complexity:
+O(M), where M = Σ length(words[i]) (total characters across all words).
+
+Space complexity:
+Space Complexity: O(1) (excluding the output string)
+
+
+class Solution {
+public:
+    string mapWordWeights(vector<string>& words, vector<int>& weights) {
+        string res(words.size(), 0);
+        int i = 0;
+
+        for (auto& word : words) {
+            int s = 0;
+            for (auto& c : word)
+                s += weights[(c & (1 << 5) - 1) - 1];
+            res[i++] = 'z' - (s - ((s * 2521) >> (1 << 4)) * 26);
+        }
+
+        return res;
+    }
+};
+
+Complexity
+Time complexity: O(L) - where L is the total number of characters across all words.
+
+Space complexity: O(1) - Excluding the output string.
+
