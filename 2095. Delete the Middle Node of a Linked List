@@ -33,3 +33,23 @@ public:
         return head;
     }
 };
+
+We can avoid counting all nodes separately by using the slow and fast pointer technique.
+
+fast moves two nodes at a time.
+slow moves one node at a time.
+When fast reaches the end, slow reaches the middle.
+Keep a pointer before slow so we can remove the middle node.
+This finds and deletes the middle node in a single traversal.
+
+Why This Is Better
+The brute force approach traverses the list twice:
+
+First pass → count nodes.
+Second pass → find middle.
+The optimal approach does both tasks in a single traversal using two pointers.
+
+Complexity
+Time Complexity: O(n)
+Space Complexity: O(1)
+
