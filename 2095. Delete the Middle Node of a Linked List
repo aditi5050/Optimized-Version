@@ -1,0 +1,35 @@
+Floyd's Tortoise & Hare | Delete In-place 
+Middle node
+The middle node is defined as the item located at the exact halfway point of a list.
+If the list contains an even number of items, the middle node is explicitly the second of the two center items.
+We can use Floyds Tortoise and Hare algorithm to delete the middle node of a linked list
+
+To delete the node in-place, we must access the node before the middle (predecessor node):
+
+So we initialize our slow pointer at the head, the while fast pointer is already two steps ahead.
+
+The slow pointer advances one node at a time, while the fast pointer advances two nodes at a time.
+
+When the fast pointer reaches the end, the slow pointer will be exactly at the predecessor of the middle node:
+We only need one iteration to locate this predecessor and reassign its pointer to complete the deletion.
+
+Time Complexity: O(n)
+Space Complexity: O(1)
+
+class Solution {
+public:
+    ListNode* deleteMiddle(ListNode* head) {
+        if (!head->next) return nullptr;
+
+        ListNode* slow = head;
+        ListNode* fast = slow->next->next;
+
+        while (fast && fast->next) {
+            slow = slow->next;
+            fast = fast->next->next;
+        }
+
+        slow->next = slow->next->next;
+        return head;
+    }
+};
