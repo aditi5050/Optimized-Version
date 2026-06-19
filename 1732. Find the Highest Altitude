@@ -1,0 +1,57 @@
+Intuition
+The biker starts at altitude 0
+Each gain[i] changes the altitude from point i to i+1
+So the altitude at any point is just a running prefix sum
+We need the maximum value among all these prefix sums (including 0)
+
+Approach
+Start with:
+
+sum = 0 (current altitude)
+ans = 0 (highest altitude so far)
+For each value in gain:
+
+Update current altitude: sum += gain[i]
+Update maximum altitude using a branchless max technique
+Global Max
+Let diff = sum - ans
+
+We want to add:
+
+diff if diff > 0
+0 otherwise
+The sign of diff is extracted using:
+
+(diff >> 31) → 0 if diff >= 0, -1 if diff < 0
+Inverting this gives a mask:
+
+~(diff >> 31) → -1 if diff >= 0, 0 if diff < 0
+This mask selectively allows diff to be applied only when it is positive
+
+The update keeps ans equal to the maximum of ans and sum
+
+Complexity
+Time complexity:
+O(n) Single pass through the array, constant work per element.
+
+Space complexity:
+O(1)
+class Solution {
+public:
+    int largestAltitude(vector<int>& gain) {
+        int n = gain.size();
+        int mx = 0;
+
+        for (int i = 0; i <= n; i++) {
+            int alt = 0;
+
+            for (int j = 0; j < i; j++) {
+                alt += gain[j];
+            }
+
+            mx = max(mx, alt);
+        }
+
+        return mx;
+    }
+};
