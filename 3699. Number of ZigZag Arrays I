@@ -1,0 +1,76 @@
+class Solution {
+public:
+    int MOD = 1e9 + 7;
+
+    int zigZagArrays(int n, int l, int r) {
+        int m = r - l + 1;
+
+        vector<long long> up(m + 1), down(m + 1);
+
+        // Length = 2
+        for (int v = 1; v <= m; v++) {
+            up[v] = v - 1;
+            down[v] = m - v;
+        }
+
+        vector<long long> pref(m + 1, 0);
+        vector<long long> suff(m + 2, 0);
+        vector<long long> newUp(m + 1), newDown(m + 1);
+
+        for (int len = 3; len <= n; len++) {
+            for (int i = 1; i <= m; i++) {
+                pref[i] = (pref[i - 1] + down[i]) % MOD;
+            }
+
+            for (int i = m; i >= 1; i--) {
+                suff[i] = (suff[i + 1] + up[i]) % MOD;
+            }
+
+            for (int x = 1; x <= m; x++) {
+                newUp[x] = pref[x - 1];
+                newDown[x] = suff[x + 1];
+            }
+
+            up = newUp;
+            down = newDown;
+        }
+
+        long long ans = 0;
+        for (int v = 1; v <= m; v++) {
+            ans = (ans + up[v] + down[v]) % MOD;
+        }
+
+        return (int)ans;
+    }
+};
+
+as we are given that no three consecutive elements should be strictly inreasing or strictly decreasing.
+so 1 3 4 is not valid (strictly increasing) that means if we think as per direction, that is 3>1 => up and 4>3 => up so direction UU is not valid
+similarly 4 3 1 is not vali(strictly decreasing), that means direction DD is also not valid.
+so the direction of the resulting array should be either UDUD... or DUDU...
+also one more thing, now we care about direction. so 101, 102 and 103 is same as 1,2,3 because both have same direction i.e. UU.
+so now we do not care about actual values, so we shift the range [l,r] t [1,m] where m = r-l+1
+suppose we have UDUD then next direction shoud be U so our future decisions depends on our past result, so this points to DP.
+dp state:
+up[v] = Number of valid arrays ending at value v whose last move was UP.
+down[v] = Number of valid arrays ending at value v whose last move was DOWN.
+base case: all valid arrays of length 2
+up[v] = v-1 (all smaller elements than v)
+down [v] = m-v (all greater elements than v)
+dp transition:
+if our prev move is UP then our current move should be down, that means to create a new down state in newDown[x] we must come from an UP state.
+and our last value is x and direction is down, so prev value > x. Also we should come from up state. so newDown[x] = up[x+1] + up[x+2] + ... i.e. newDown[x] = sum of all up[v] where v>x
+similarly for new up state we should come from a down state. so newUp[x] = down[1] + down[2] + down[3] + ... i.e. newUp[x] = sum of all down[v] where v<x
+so in 6-2 and 6-3 we need sums from 1 to x and x+1 to m so we use prefix sum over down array and suffix sum over up array
+so newDown[x] = suff[x+1] and newUp[x] = pref[x-1]
+then up = newUp and down = newDown
+at the end when we do this for length n, then we need to find the total valid arrays.
+so an array can end with any value v and with either up direction or down direction. so we take sum of up[v] and down[v] for all v in [1,m]
+
+Complexity
+Time complexity:
+O(n*m) where m = r-l+1
+
+Space complexity:
+O(m)
+
