@@ -1,0 +1,98 @@
+Approach
+Let
+
+m = r - l + 1
+
+and remap values into indices 0 ... m-1.
+
+I create 2 * m states.
+
+State meaning:
+
+up[x] → current value is x, next element must be larger.
+down[x] → current value is x, next element must be smaller.
+Transitions:
+
+From up[x], I can move to down[y] for every y > x.
+From down[x], I can move to up[y] for every y < x.
+After choosing the next value, the required direction flips automatically.
+
+This gives a transition matrix T of size (2m) × (2m).
+
+For an array of length 1, every value can start with either expectation:
+
+start in up[x]
+start in down[x]
+So the initial vector contains 1 in all 2m states.
+
+Each transition adds exactly one new element.
+
+Therefore:
+
+length 1 → initial vector
+length n → T^(n-1) * initial
+The final answer is the sum of all entries in the resulting vector.
+
+I compute T^(n-1) using fast matrix exponentiation.
+
+class Solution {
+public:
+    const int MOD = 1e9 + 7;
+    vector<vector<long long>> func(vector<vector<long long>> & a, vector<vector<long long>> & b) {
+        vector<vector<long long>> ans;
+        for (int i = 0; i < a.size(); ++i) {
+            vector<long long> temp;
+            for (int j = 0; j < b[0].size(); ++j) {
+                long long sum = 0LL;
+                for (int k = 0; k < b.size(); ++k) {
+                    sum += a[i][k] * b[k][j];
+                    sum %= MOD;
+                }
+                temp.push_back(sum);
+            }
+            ans.push_back(temp);
+        }
+        return ans;
+    }
+
+    int zigZagArrays(int n, int l, int r) {
+        int m = r - l + 1;
+
+        vector<vector<long long>> ans(m, vector<long long>(1, 0));
+        ans[0][0] = 1;
+        vector<vector<long long>> sm(m, vector<long long>(m, 0)), bm(m, vector<long long>(m, 0));
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < i; ++j) {
+                sm[i][j] = 1;
+            }
+        }
+
+        for (int i = 0; i < m; ++i) {
+            for (int j = i+1; j<m; ++j) {
+                bm[i][j] = 1;
+            }
+        }
+
+        auto k = func(bm, sm);
+        int half = n / 2;
+        while(half) {
+            if (half & 1) {
+                ans = func(k, ans);
+                half--;
+            } else {
+                k = func(k, k);
+                half /= 2;
+            }
+        }
+
+        if (n % 2 == 1) {
+            ans = func(sm, ans);
+        }
+        long long ret = 0LL;
+        for (int i = 0; i < m; ++i) {
+            ret += ans[i][0];
+            ret %= MOD;
+        }
+        return (2 * ret + MOD) % MOD;
+    }
+};
