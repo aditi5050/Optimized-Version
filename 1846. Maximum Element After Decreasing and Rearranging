@@ -1,0 +1,38 @@
+class Solution {
+public:
+    int maximumElementAfterDecrementingAndRearranging(vector<int>& arr) {
+
+        sort(arr.begin(), arr.end());
+
+        arr[0] = 1;
+
+        for (int i = 1; i < arr.size(); i++) {
+
+            arr[i] = min(arr[i], arr[i - 1] + 1);
+        }
+
+        return arr.back();
+    }
+};
+
+Approach
+First, I sort the array in increasing order.
+
+Then I set the first element to 1 because the problem requires it.
+
+Now I go through the remaining elements one by one.
+
+For each element, there are two possibilities:
+
+If it is already small enough, I keep it.
+If it is too large, I decrease it to previous + 1.
+So the new value becomes:
+
+arr[i] = min(arr[i], arr[i - 1] + 1)
+
+This guarantees two things:
+
+The array always satisfies the adjacent difference condition.
+Every element is as large as possible, so the last element becomes the maximum possible answer.
+Finally, I return the last element of the array.
+
