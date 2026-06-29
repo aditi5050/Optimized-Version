@@ -1,0 +1,136 @@
+iven an array of strings patterns and a string word, return the number of strings in patterns that exist as a substring in word.
+
+A substring is a contiguous sequence of characters within a string.
+
+ 
+
+Example 1:
+
+Input: patterns = ["a","abc","bc","d"], word = "abc"
+Output: 3
+Explanation:
+- "a" appears as a substring in "abc".
+- "abc" appears as a substring in "abc".
+- "bc" appears as a substring in "abc".
+- "d" does not appear as a substring in "abc".
+3 of the strings in patterns appear as a substring in worAho–Corasick Automaton
+Instead of searching for each word one by one (which is too slow), Aho-Corasick builds a special kind of finite state machine based on the patterns you want to find.
+
+It achieves this in three main steps:
+
+Build a Trie: It organizes all your target words into a trie where every branch represents a character.
+
+Add Failure Links (Suffix Links): When the search hits a dead end, failure links tell the algorithm exactly where to "backtrack" so it doesn't have to restart from the beginning of the text.
+
+It jumps to the longest possible prefix that matches a suffix of the current string.
+Add Output Links: When a pattern is found, output links quickly report any other shorter patterns that might be nested inside it without breaking the search momentum.The automaton stores every pattern in a trie and augments it with failure links, allowing the text to be scanned only once.
+
+Whenever we reach a state while scanning word, we can identify every pattern that ends at the current position.
+
+Approach
+Insert every string in patterns into a trie.
+
+Each terminal node records how many patterns end there.
+Duplicate patterns naturally accumulate at the same terminal node.
+Build the automaton using a breadth-first traversal.
+
+Compute a failure link for every node.
+A failure link points to the longest proper suffix that is also a trie prefix.
+Also establish output links so that terminal nodes along the failure chain can be visited efficiently.
+Scan word from left to right.
+
+Follow the automaton transition for each character.
+The current state represents the longest suffix of the processed text that is also a trie prefix.
+Visit the current terminal node and every terminal node reachable through its output links to report all matching patterns ending at the current position.
+Since the problem only asks whether each pattern appears at least once, count each terminal node only the first time it is visited. Any later occurrences of the same pattern are ignored.
+
+
+class Solution {
+    struct Node {
+        Node* c[26]{};
+        Node* f{};
+        Node* l{};
+        int n = 0;
+    };
+
+    static constexpr int mx = 10005;
+
+public:
+    int numOfStrings(vector<string>& patterns, string word) {
+        Node* root = new Node();
+        
+        for (auto& p : patterns) {
+            Node* curr = root;
+            
+            for (int i = 0; i < p.size(); i++) {
+                int x = p[i] - 97;
+                
+                if (!curr->c[x])
+                    curr->c[x] = new Node();
+                    
+                curr = curr->c[x];
+            }
+            
+            curr->n++;
+        }
+        
+        Node* q[mx];
+        int hd = 0;
+        int tl = 0;
+        
+        for (int i = 0; i < 26; i++) {
+            if (!root->c[i]) {
+                root->c[i] = root;
+                continue;
+            }
+            
+            root->c[i]->f = root;
+            root->c[i]->l = nullptr;
+            q[tl] = root->c[i];
+            tl++;
+        }
+        
+        while (hd < tl) {
+            Node* curr = q[hd];
+            hd++;
+            
+            for (int i = 0; i < 26; i++) {
+                if (!curr->c[i]) {
+                    curr->c[i] = curr->f->c[i];
+                    continue;
+                }
+                
+                curr->c[i]->f = curr->f->c[i];
+                
+                if (!curr->c[i]->f->n)
+                    curr->c[i]->l = curr->c[i]->f->l;
+                else
+                    curr->c[i]->l = curr->c[i]->f;
+                    
+                q[tl] = curr->c[i];
+                tl++;
+            }
+        }
+        
+        Node* curr = root;
+        int res = 0;
+        
+        for (auto& w : word) {
+            int x = w - 97;
+            curr = curr->c[x];
+            
+            Node* m = curr;
+            
+            while (m) {
+                res += m->n;
+                m->n = 0;
+                
+                Node* tmp = m->l;
+                m->l = nullptr;
+                m = tmp;
+            }
+        }
+        
+        return res;
+    }
+};
